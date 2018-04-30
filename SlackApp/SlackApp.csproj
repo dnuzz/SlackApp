@@ -4,6 +4,15 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
     <UserSecretsId>e038b907-f64b-4363-958d-90725f06de13</UserSecretsId>
+    <StartupObject>SlackApp.Program</StartupObject>
+    <ApplicationIcon />
+    <OutputType>WinExe</OutputType>
+    <RuntimeIdentifiers>win10-x64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,7 +21,7 @@
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.Core" Version="3.3.22.2" />
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.7" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.1" />
     <PackageReference Include="SlackAPI" Version="1.0.5.93" />
   </ItemGroup>
