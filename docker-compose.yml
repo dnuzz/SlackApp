@@ -5,4 +5,4 @@ services:
     image: slackapp
     build:
       context: .
-      dockerfile: SlackApp\Dockerfile
+      dockerfile: SlackApp/Dockerfile

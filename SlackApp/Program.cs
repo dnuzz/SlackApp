@@ -20,6 +20,7 @@ namespace SlackApp
         {
             var host = WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
+                .UseKestrel()
                 .Build();
 
             host.Run();

@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SlackApp", "SlackApp\SlackApp.csproj", "{DBB4F7AC-BFE2-4F1A-8EB7-026FDA762068}"
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{655075D9-939F-49B0-9B28-134F460EC4AC}"
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{ED68694A-E2FE-4135-8798-7D67D9E4EFB0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{DBB4F7AC-BFE2-4F1A-8EB7-026FDA762068}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBB4F7AC-BFE2-4F1A-8EB7-026FDA762068}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DBB4F7AC-BFE2-4F1A-8EB7-026FDA762068}.Release|Any CPU.Build.0 = Release|Any CPU
-		{655075D9-939F-49B0-9B28-134F460EC4AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{655075D9-939F-49B0-9B28-134F460EC4AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{655075D9-939F-49B0-9B28-134F460EC4AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{655075D9-939F-49B0-9B28-134F460EC4AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED68694A-E2FE-4135-8798-7D67D9E4EFB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED68694A-E2FE-4135-8798-7D67D9E4EFB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED68694A-E2FE-4135-8798-7D67D9E4EFB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED68694A-E2FE-4135-8798-7D67D9E4EFB0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
