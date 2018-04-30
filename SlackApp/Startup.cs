@@ -17,7 +17,7 @@ namespace SlackApp
     public class Startup
     {
         public SlackSocketClient slackClient { get; private set; }
-        public TrollBot bot { get; private set; }
+        public BotRegexResponder bot { get; private set; }
 
         public Startup(IHostingEnvironment env)
         {
@@ -48,7 +48,7 @@ namespace SlackApp
             }
 
             slackClient = BuildSlackSocketClient(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN"));
-            bot = new TrollBot(slackClient);
+            bot = new BotRegexResponder(slackClient);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
