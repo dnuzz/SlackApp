@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  slackapp:
+    image: slackapp
+    build:
+      context: .
+      dockerfile: SlackApp\Dockerfile
