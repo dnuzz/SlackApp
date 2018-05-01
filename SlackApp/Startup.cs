@@ -16,7 +16,8 @@ namespace SlackApp
 {
     public class Startup
     {
-        public SlackSocketClient slackClient { get; private set; }
+        public SlackSocketClient slackSocketClient { get; private set; }
+        public SlackClient slackNormalClient { get; private set; }
         public BotRegexResponder bot { get; private set; }
 
         public Startup(IHostingEnvironment env)
@@ -46,9 +47,14 @@ namespace SlackApp
             {
                 Environment.SetEnvironmentVariable("SLACKAUTHTOKEN", Configuration["SLACKAUTHTOKEN"]);
             }
+            if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN2")))
+            {
+                Environment.SetEnvironmentVariable("SLACKAUTHTOKEN2", Configuration["SLACKAUTHTOKEN2"]);
+            }
 
-            slackClient = BuildSlackSocketClient(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN"));
-            bot = new BotRegexResponder(slackClient);
+            slackSocketClient = BuildSlackSocketClient(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN"));
+            slackNormalClient = BuildSlackClient(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN2"));
+            bot = new BotRegexResponder(slackSocketClient, slackNormalClient);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -66,6 +72,21 @@ namespace SlackApp
         {
             ManualResetEventSlim clientReady = new ManualResetEventSlim(false);
             SlackSocketClient client = new SlackSocketClient(auth_token);
+            client.Connect((connected) => {
+                // This is called once the client has emitted the RTM start command
+                clientReady.Set();
+            }, () => {
+                Console.WriteLine("Connected to Slack");
+            });
+            clientReady.Wait();
+
+            return client;
+        }
+
+        public SlackClient BuildSlackClient(string auth_token)
+        {
+            ManualResetEventSlim clientReady = new ManualResetEventSlim(false);
+            SlackClient client = new SlackClient(auth_token);
             client.Connect((connected) => {
                 // This is called once the client has emitted the RTM start command
                 clientReady.Set();

@@ -14,14 +14,18 @@ namespace SlackApp.Controllers
         public static Dictionary<string, Action<NewMessage,string>> methodMap = new Dictionary<string, Action<NewMessage,string>>();
         public static List<RegexResponse> regexResponses = new List<RegexResponse>();
         private SlackSocketClient client;
+        private SlackClient normalClient;
+        private DateTime botCooldownEnd = DateTime.UtcNow;
 
-        public BotRegexResponder(SlackSocketClient client)
+        public BotRegexResponder(SlackSocketClient client,SlackClient normalClient)
         {
+            this.normalClient = normalClient;
             this.client = client;
             client.OnMessageReceived += (message) => { this.Receiver(message); };
             client.OnMessageReceived += (message) => { Console.WriteLine(message.text); }; //Remove this later
             methodMap.Add(@"([+-]?(\d+\.?\d+?)+)\s?°?[Cc]", (m,s) => { TemperatureConversion(m,s); });
             methodMap.Add(@"([+-]?(\d+\.?\d?)+)\s?([kK]m)|([kK]ilometers)", (m,s) => { DistanceConversion(m,s); });
+            regexResponses.Add(new RegexResponse { Regex = @"(ur)|(your)|('s)\s([mM]om|[mM]other)", Response = "Please reserve that for \"That Channel\"", DeleteMessage = true });
         }
 
         public static void AddRegexResponse(RegexResponse regexResp)
@@ -31,9 +35,21 @@ namespace SlackApp.Controllers
 
         public void Receiver(NewMessage message)
         {
-            foreach(var m in methodMap)
+            if (message.subtype == "bot_message")
             {
-                if (Regex.IsMatch(message.text,m.Key) && message.subtype != "bot_message")
+                if(DateTime.UtcNow < botCooldownEnd)
+                {
+                    return;
+                }
+                else
+                {
+                    botCooldownEnd = DateTime.UtcNow.AddSeconds(5.0);
+                }
+            }
+
+            foreach (var m in methodMap)
+            {
+                if (Regex.IsMatch(message.text,m.Key))
                 {
                     try
                     {
@@ -44,9 +60,19 @@ namespace SlackApp.Controllers
             }
             foreach (var r in regexResponses)
             {
-                if (Regex.IsMatch(message.text, r.Regex) && message.subtype != "bot_message")
+                if (Regex.IsMatch(message.text, r.Regex))
                 {
                     client.PostMessage(null, message.channel, r.Response);
+                    if( r.DeleteMessage)
+                    {
+                        normalClient.DeleteMessage((m) => {
+                            if (!m.ok)
+                            {
+                                Console.WriteLine(m.error);
+                            } },
+                            message.channel,
+                            message.ts);
+                    }
                 }
             }
         }

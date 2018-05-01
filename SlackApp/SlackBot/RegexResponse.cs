@@ -10,5 +10,6 @@ namespace SlackApp.SlackBot
     {
         public string Regex { get; set; }
         public string Response {get; set;}
+        public bool DeleteMessage { get; set; }
     }
 }
