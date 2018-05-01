@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SlackApp", "SlackApp\SlackA
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{ED68694A-E2FE-4135-8798-7D67D9E4EFB0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlackAPIService", "..\SlackAPIService\SlackAPIService.csproj", "{859682A2-09B4-4E6E-B80E-6C25B3F3F14F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{ED68694A-E2FE-4135-8798-7D67D9E4EFB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED68694A-E2FE-4135-8798-7D67D9E4EFB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED68694A-E2FE-4135-8798-7D67D9E4EFB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{859682A2-09B4-4E6E-B80E-6C25B3F3F14F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{859682A2-09B4-4E6E-B80E-6C25B3F3F14F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{859682A2-09B4-4E6E-B80E-6C25B3F3F14F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{859682A2-09B4-4E6E-B80E-6C25B3F3F14F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

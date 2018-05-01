@@ -11,6 +11,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SlackAPI;
 using SlackApp.Controllers;
+using Amazon.Runtime;
+using SlackAPIService;
+using Microsoft.AspNetCore.JsonPatch.Operations;
 
 namespace SlackApp
 {
@@ -46,6 +49,10 @@ namespace SlackApp
             {
                 Environment.SetEnvironmentVariable("SLACKAUTHTOKEN", Configuration["SLACKAUTHTOKEN"]);
             }
+            services.AddSingleton<ISlackClient> (new SlackClientService(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN")));
+            services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
+            //services.AddAWSService<IAmazonS3>();
+            //services.AddAWSService<IAmazonDynamoDB>();
 
             slackClient = BuildSlackSocketClient(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN"));
             bot = new BotRegexResponder(slackClient);
