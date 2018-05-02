@@ -45,7 +45,7 @@ namespace SlackApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            
             if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN")))
             {
                 Environment.SetEnvironmentVariable("SLACKAUTHTOKEN", Configuration["SLACKAUTHTOKEN"]);
@@ -54,9 +54,7 @@ namespace SlackApp
             {
                 Environment.SetEnvironmentVariable("SLACKSOCKETAUTHTOKEN", Configuration["SLACKSOCKETAUTHTOKEN"]);
             }
-            services.AddSingleton<ISlackSocketClient>(new SlackSocketClientService(Environment.GetEnvironmentVariable("SLACKSOCKETAUTHTOKEN")));
-            services.AddSingleton<ISlackClient> (new SlackClientService(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN")));
-            
+            services.AddMvc();
             services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
             services.AddAWSService<IAmazonDynamoDB>();
         }
