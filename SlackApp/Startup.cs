@@ -14,13 +14,14 @@ using SlackApp.Controllers;
 using Amazon.Runtime;
 using SlackAPIService;
 using Microsoft.AspNetCore.JsonPatch.Operations;
+using Amazon.DynamoDBv2;
 
 namespace SlackApp
 {
     public class Startup
     {
         public SlackSocketClient slackClient { get; private set; }
-        public BotRegexResponder bot { get; private set; }
+        public IAmazonService amazonClient { get; private set; }
 
         public Startup(IHostingEnvironment env)
         {
@@ -49,13 +50,15 @@ namespace SlackApp
             {
                 Environment.SetEnvironmentVariable("SLACKAUTHTOKEN", Configuration["SLACKAUTHTOKEN"]);
             }
+            if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("SLACKSOCKETAUTHTOKEN")))
+            {
+                Environment.SetEnvironmentVariable("SLACKSOCKETAUTHTOKEN", Configuration["SLACKSOCKETAUTHTOKEN"]);
+            }
+            services.AddSingleton<ISlackSocketClient>(new SlackSocketClientService(Environment.GetEnvironmentVariable("SLACKSOCKETAUTHTOKEN")));
             services.AddSingleton<ISlackClient> (new SlackClientService(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN")));
+            
             services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
-            //services.AddAWSService<IAmazonS3>();
-            //services.AddAWSService<IAmazonDynamoDB>();
-
-            slackClient = BuildSlackSocketClient(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN"));
-            bot = new BotRegexResponder(slackClient);
+            services.AddAWSService<IAmazonDynamoDB>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,21 +70,6 @@ namespace SlackApp
             }
 
             app.UseMvc();
-        }
-
-        public SlackSocketClient BuildSlackSocketClient(string auth_token)
-        {
-            ManualResetEventSlim clientReady = new ManualResetEventSlim(false);
-            SlackSocketClient client = new SlackSocketClient(auth_token);
-            client.Connect((connected) => {
-                // This is called once the client has emitted the RTM start command
-                clientReady.Set();
-            }, () => {
-                Console.WriteLine("Connected to Slack");
-            });
-            clientReady.Wait();
-
-            return client;
         }
     }
 }

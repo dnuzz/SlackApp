@@ -5,8 +5,8 @@ using System.Text;
 
 namespace SlackAPIService
 {
-    public interface ISlackClient
+    public interface ISlackSocketClient
     {
-        SlackClient GetSlackClient();
+        SlackSocketClient GetSlackSocketClient();
     }
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SlackApp.SlackBot
+namespace SlackApp.BotResponses
 {
     public class RegexResponse
     {
