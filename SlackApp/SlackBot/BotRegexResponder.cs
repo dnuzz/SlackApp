@@ -25,7 +25,7 @@ namespace SlackApp.Controllers
             client.OnMessageReceived += (message) => { Console.WriteLine(message.text); }; //Remove this later
             methodMap.Add(@"([+-]?(\d+\.?\d+?)+)\s?°?[Cc]", (m,s) => { TemperatureConversion(m,s); });
             methodMap.Add(@"([+-]?(\d+\.?\d?)+)\s?([kK]m)|([kK]ilometers)", (m,s) => { DistanceConversion(m,s); });
-            regexResponses.Add(new RegexResponse { Regex = @"(ur)|(your)|('s)\s([mM]om|[mM]other)", Response = "Please reserve that for \"That Channel\"", DeleteMessage = true });
+            regexResponses.Add(new RegexResponse { Regex = @"(ur|your|'s)\s*(mom|mother|maternal)+", Response = "stop that", DeleteMessage = true });
         }
 
         public static void AddRegexResponse(RegexResponse regexResp)
@@ -37,13 +37,21 @@ namespace SlackApp.Controllers
         {
             if (message.subtype == "bot_message")
             {
-                if(DateTime.UtcNow < botCooldownEnd)
+                if(DateTime.UtcNow > botCooldownEnd)
                 {
+                    normalClient.DeleteMessage((m) => {
+                        if (!m.ok)
+                        {
+                            Console.WriteLine(m.error);
+                        }
+                        },
+                        message.channel,
+                        message.ts);
                     return;
                 }
                 else
                 {
-                    botCooldownEnd = DateTime.UtcNow.AddSeconds(5.0);
+                    botCooldownEnd = DateTime.UtcNow.AddSeconds(180.0);
                 }
             }
 
@@ -60,7 +68,7 @@ namespace SlackApp.Controllers
             }
             foreach (var r in regexResponses)
             {
-                if (Regex.IsMatch(message.text, r.Regex))
+                if (Regex.IsMatch(message.text, r.Regex,RegexOptions.IgnoreCase))
                 {
                     client.PostMessage(null, message.channel, r.Response);
                     if( r.DeleteMessage)
