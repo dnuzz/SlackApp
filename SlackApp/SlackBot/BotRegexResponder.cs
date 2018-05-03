@@ -26,7 +26,8 @@ namespace SlackApp.Controllers
             client.OnMessageReceived += (message) => { Console.WriteLine(message.text); }; //Remove this later
             methodMap.Add(@"([+-]?(\d+\.?\d+?)+)\s?°?[Cc]", (m,s) => { TemperatureConversion(m,s); });
             methodMap.Add(@"([+-]?(\d+\.?\d?)+)\s?([kK]m)|([kK]ilometers)", (m,s) => { DistanceConversion(m,s); });
-            regexResponses.Add(new RegexResponse { Regex = @"(ur|your|'s)\s*(mom|mother|maternal|mum)+", Response = "stop that", DeleteMessage = true });
+            regexResponses.Add(new RegexResponse { Regex = @"(ur|y..r|'s)\s*(m.m|m..h.r|m.t.rnal)+", Response = "stop that", DeleteMessage = true });
+            regexResponses.Add(new RegexResponse { Regex = @"(m.m|m..h.r|m.t.rnal)'?s (box|face|butt|ass|cunt)", Response = "stop that", DeleteMessage = true });
         }
 
         public static void AddRegexResponse(RegexResponse regexResp)
