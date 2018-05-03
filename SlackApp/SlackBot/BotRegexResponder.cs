@@ -15,6 +15,7 @@ namespace SlackApp.Controllers
         public static List<RegexResponse> regexResponses = new List<RegexResponse>();
         private SlackSocketClient client;
         private SlackClient normalClient;
+        private List<Tuple<string, string, DateTime>> botCoolDowns = new List<Tuple<string, string, DateTime>>();
         private DateTime botCooldownEnd = DateTime.UtcNow;
 
         public BotRegexResponder(SlackSocketClient client,SlackClient normalClient)
@@ -25,7 +26,7 @@ namespace SlackApp.Controllers
             client.OnMessageReceived += (message) => { Console.WriteLine(message.text); }; //Remove this later
             methodMap.Add(@"([+-]?(\d+\.?\d+?)+)\s?°?[Cc]", (m,s) => { TemperatureConversion(m,s); });
             methodMap.Add(@"([+-]?(\d+\.?\d?)+)\s?([kK]m)|([kK]ilometers)", (m,s) => { DistanceConversion(m,s); });
-            regexResponses.Add(new RegexResponse { Regex = @"(ur|your|'s)\s*(mom|mother|maternal)+", Response = "stop that", DeleteMessage = true });
+            regexResponses.Add(new RegexResponse { Regex = @"(ur|your|'s)\s*(mom|mother|maternal|mum)+", Response = "stop that", DeleteMessage = true });
         }
 
         public static void AddRegexResponse(RegexResponse regexResp)
@@ -37,21 +38,27 @@ namespace SlackApp.Controllers
         {
             if (message.subtype == "bot_message")
             {
-                if(DateTime.UtcNow > botCooldownEnd)
+                var bot_channel = botCoolDowns
+                    .Where((x) => { return x.Item1 == message.user && x.Item2 == message.channel; })
+                    .DefaultIfEmpty(new Tuple<string, string, DateTime>(String.Empty, string.Empty, DateTime.MinValue))
+                    .FirstOrDefault();
+
+                if (bot_channel.Item1 == message.user && bot_channel.Item2 == message.channel && bot_channel.Item3 > DateTime.UtcNow)
                 {
-                    normalClient.DeleteMessage((m) => {
-                        if (!m.ok)
+                    normalClient.DeleteMessage((m) =>
                         {
-                            Console.WriteLine(m.error);
-                        }
+                            if (!m.ok)
+                            {
+                                Console.WriteLine(m.error);
+                            }
                         },
                         message.channel,
                         message.ts);
                     return;
-                }
-                else
+                } else
                 {
-                    botCooldownEnd = DateTime.UtcNow.AddSeconds(180.0);
+                    botCoolDowns.Remove(bot_channel);
+                    botCoolDowns.Add(new Tuple<string, string, DateTime>(message.user, message.channel, DateTime.UtcNow.AddSeconds(180.0)));
                 }
             }
 
