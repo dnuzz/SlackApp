@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using SlackAPI;
 using SlackAPI.WebSocketMessages;
+using Newtonsoft.Json;
 
 namespace SlackAPIService
 {
@@ -55,9 +57,43 @@ namespace SlackAPIService
             return _socketclient;
         }
 
-        public void RespondToMessage(NewMessage original, string text, string botName = null, string parse = null, bool linkNames = false, Attachment[] attachments = null, bool unfurl_links = false, string icon_url = null, string icon_emoji = null, bool as_user = false)
+        public void RespondToMessage(NewMessage original, string text, bool ephemeral = false, string botName = null, string parse = null, bool linkNames = false, Attachment[] attachments = null, bool unfurl_links = false, string icon_url = null, string icon_emoji = null, bool as_user = false)
         {
-            _socketclient.PostMessage(null, original.channel, text, botName, parse, linkNames, attachments, unfurl_links, icon_url, icon_emoji, as_user, thread_ts);
+            if (ephemeral)
+            {
+                List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+                parameters.Add(new Tuple<string, string>("channel", original.channel));
+                parameters.Add(new Tuple<string, string>("text", text));
+
+                if (!string.IsNullOrEmpty(botName))
+                    parameters.Add(new Tuple<string, string>("user", original.user));
+
+                if (!string.IsNullOrEmpty(parse))
+                    parameters.Add(new Tuple<string, string>("parse", parse));
+
+                if (linkNames)
+                    parameters.Add(new Tuple<string, string>("link_names", "1"));
+
+                if (attachments != null && attachments.Length > 0)
+                    parameters.Add(new Tuple<string, string>("attachments",
+                        JsonConvert.SerializeObject(attachments, Formatting.None,
+                                new JsonSerializerSettings // Shouldn't include a not set property
+                            {
+                                    NullValueHandling = NullValueHandling.Ignore
+                                })));
+
+                if (unfurl_links)
+                    parameters.Add(new Tuple<string, string>("unfurl_links", "1"));
+
+                parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
+
+                _client.APIRequestWithToken<PostEphemeralResponse>(null,parameters.ToArray());
+            }
+            else
+            {
+                _socketclient.PostMessage(null, original.channel, text, botName, parse, linkNames, attachments, unfurl_links, icon_url, icon_emoji, as_user, thread_ts);
+            }
         }
 
         public void SubscribeToMessage(Action<NewMessage> action)
