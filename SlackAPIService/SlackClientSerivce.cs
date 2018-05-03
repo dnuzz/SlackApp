@@ -17,12 +17,10 @@ namespace SlackAPIService
             ManualResetEventSlim clientReady = new ManualResetEventSlim(false);
             SlackClient client = new SlackClient(authtoken);
             client.Connect((connected) => {
-                // This is called once the client has emitted the RTM start command
-                if (!connected.ok) { Console.WriteLine(connected.error); }
-                clientReady.Set();
-            }, () => {
-                Console.WriteLine("Connected Client to Slack");
-            });
+                    if (!connected.ok) { Console.WriteLine(connected.error); }
+                    else { Console.WriteLine("Connected Client to Slack"); }
+                    clientReady.Set();
+                }, () => {});
             clientReady.Wait();
 
             this._client = client;
@@ -57,7 +55,7 @@ namespace SlackAPIService
             return _socketclient;
         }
 
-        public void RespondToMessage(NewMessage original, string text, bool ephemeral = false, string botName = null, string parse = null, bool linkNames = false, Attachment[] attachments = null, bool unfurl_links = false, string icon_url = null, string icon_emoji = null, bool as_user = false)
+        public void RespondToMessage(NewMessage original, string text, bool ephemeral = false, string botName = null, string parse = null, bool linkNames = false, Attachment[] attachments = null, bool unfurl_links = false, string icon_url = null, string icon_emoji = null, bool as_user = false, string thread_ts = null)
         {
             if (ephemeral)
             {

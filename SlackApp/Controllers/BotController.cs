@@ -21,9 +21,9 @@ namespace SlackApp.Controllers
         public static Dictionary<string, Action<NewMessage, string>> methodMap = new Dictionary<string, Action<NewMessage, string>>();
         public static List<RegexResponse> regexResponses = new List<RegexResponse>();
 
-        public BotController(ISlackSocketClient socketclient,ISlackClient client)
+        public BotController(ISlackClient client)
         {
-            this._socketclient = socketclient.GetSlackSocketClient();
+            this._socketclient = client.GetSlackSocketClient();
             this._client = client.GetSlackClient();
             _socketclient.OnMessageReceived += (message) => { this.Receiver(message); };
             _socketclient.OnMessageReceived += (message) => { Console.WriteLine(message.text); }; //Remove this later

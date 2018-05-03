@@ -16,6 +16,6 @@ namespace SlackAPIService
 
         bool DeleteMessage(NewMessage message);
 
-        void RespondToMessage(NewMessage original, string text, bool ephemeral = false, string botName = null, string parse = null, bool linkNames = false, Attachment[] attachments = null, bool unfurl_links = false, string icon_url = null, string icon_emoji = null, bool as_user = false);
+        void RespondToMessage(NewMessage original, string text, bool ephemeral = false, string botName = null, string parse = null, bool linkNames = false, Attachment[] attachments = null, bool unfurl_links = false, string icon_url = null, string icon_emoji = null, bool as_user = false, string thread_ts = null);
     }
 }
