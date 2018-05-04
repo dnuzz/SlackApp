@@ -20,9 +20,11 @@ namespace SlackApp.BotResponses
         {
             foreach(var regex in DeleteRegexs)
             {
-                if (Regex.IsMatch(message.text, regex)) ;
+                if (!message.channel.StartsWith('D') && Regex.IsMatch(message.text, regex, RegexOptions.IgnoreCase))
+                {
+                    Client.DeleteMessage(message);
+                }
             }
-            Client.DeleteMessage(message);
         }
     }
 }

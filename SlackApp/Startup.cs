@@ -15,13 +15,15 @@ using Amazon.Runtime;
 using SlackAPIService;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Amazon.DynamoDBv2;
+using SlackApp.BotResponses;
 
 namespace SlackApp
 {
     public class Startup
     {
-        public SlackSocketClient slackClient { get; private set; }
-        public IAmazonService amazonClient { get; private set; }
+        public SlackClientService SlackClientProvider { get; private set; }
+        public IAmazonService AmazonClient { get; private set; }
+        public List<AbstractSocketResponse> BotResponders { get; private set; }
 
         public Startup(IHostingEnvironment env)
         {
@@ -57,6 +59,13 @@ namespace SlackApp
             services.AddMvc();
             services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
             services.AddAWSService<IAmazonDynamoDB>();
+
+            SlackClientProvider = new SlackClientService(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN"), Environment.GetEnvironmentVariable("SLACKSOCKETAUTHTOKEN"));
+
+            BotResponders.Add(new BotLimiterResponse(SlackClientProvider));
+            BotResponders.Add(new ConversionResponse(SlackClientProvider));
+            BotResponders.Add(new RegexResponse(SlackClientProvider));
+            BotResponders.Add(new DeleteResponse(SlackClientProvider));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -20,9 +20,12 @@ namespace SlackApp.BotResponses
         {
             foreach(var r in RegexResponses)
             {
-                if (Regex.IsMatch(r.Regex, message.text))
+                if (!message.channel.StartsWith('D') && Regex.IsMatch(message.text, r.Regex, RegexOptions.IgnoreCase))
                 {
-                    this.Client.RespondToMessage(message, r.Response, ephemeral: r.Ephemeral);
+                    if (Regex.IsMatch(r.Regex, message.text))
+                    {
+                        this.Client.RespondToMessage(message, r.Response, ephemeral: r.Ephemeral);
+                    }
                 }
             }
         }
