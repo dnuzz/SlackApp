@@ -144,7 +144,7 @@ namespace SlackApp.Controllers
                 groups.Add(g.Value);
             }
 
-            var replacement = $"That is {Double.Parse(groups[1]) / 2.2046} in pounds";
+            var replacement = $"That is {Double.Parse(groups[1]) * 2.2046} in pounds";
 
             client.PostMessage(null, message.channel, replacement);
         }
