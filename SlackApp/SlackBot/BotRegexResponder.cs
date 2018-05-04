@@ -11,7 +11,7 @@ namespace SlackApp.Controllers
 {
     public class BotRegexResponder
     {
-        public static Dictionary<string, Action<NewMessage,string>> methodMap = new Dictionary<string, Action<NewMessage,string>>();
+        public static Dictionary<string, Action<NewMessage,string>> ConversionMethodMap = new Dictionary<string, Action<NewMessage,string>>();
         public static List<RegexResponse> regexResponses = new List<RegexResponse>();
         private SlackSocketClient client;
         private SlackClient normalClient;
@@ -22,10 +22,19 @@ namespace SlackApp.Controllers
         {
             this.normalClient = normalClient;
             this.client = client;
-            client.OnMessageReceived += (message) => { this.Receiver(message); };
-            client.OnMessageReceived += (message) => { Console.WriteLine(message.text); }; //Remove this later
-            methodMap.Add(@"([+-]?(\d+\.?\d+?)+)\s?°?[Cc]", (m,s) => { TemperatureConversion(m,s); });
-            methodMap.Add(@"([+-]?(\d+\.?\d?)+)\s?([kK]m)|([kK]ilometers)", (m,s) => { DistanceConversion(m,s); });
+
+
+            client.OnMessageReceived += (message) => { this.BotCooldownReceiver(message); };
+            client.OnMessageReceived += (message) => { this.ConversionReceiver(message); };
+            client.OnMessageReceived += (message) => { this.RegexReceiver(message); };
+            //client.OnMessageReceived += (message) => { Console.WriteLine(message.text); }; //Remove this later
+
+
+            ConversionMethodMap.Add(@"([+-]?(\d+\.?\d+?)+)\s?°?(c\s)|(celcius)", (m,s) => { TemperatureConversion(m,s); });
+            ConversionMethodMap.Add(@"([+-]?(\d+\.?\d?)+)\s?(km)|(kilometers)", (m,s) => { DistanceConversion(m,s); });
+            ConversionMethodMap.Add(@"([+-]?(\d+\.?\d?)+)\s?(kg)|(kilograms)", (m, s) => { MassConversion(m, s); });
+
+
             regexResponses.Add(new RegexResponse { Regex = @"(ur|y..r|'s)\s*(m.m|m..h.r|m.t.rnal)+", Response = "stop that", DeleteMessage = true });
             regexResponses.Add(new RegexResponse { Regex = @"(m.m|m..h.r|m.t.rnal)'?s (box|face|butt|ass|cunt)", Response = "stop that", DeleteMessage = true });
         }
@@ -35,9 +44,9 @@ namespace SlackApp.Controllers
             regexResponses.Add(regexResp);
         }
 
-        public void Receiver(NewMessage message)
+        public void BotCooldownReceiver(NewMessage message)
         {
-            if (message.subtype == "bot_message")
+            if (message.subtype == "bot_message" && !message.channel.StartsWith('D'))
             {
                 var bot_channel = botCoolDowns
                     .Where((x) => { return x.Item1 == message.user && x.Item2 == message.channel; })
@@ -62,21 +71,26 @@ namespace SlackApp.Controllers
                     botCoolDowns.Add(new Tuple<string, string, DateTime>(message.user, message.channel, DateTime.UtcNow.AddSeconds(180.0)));
                 }
             }
+        }
 
-            foreach (var m in methodMap)
+        public void ConversionReceiver(NewMessage message) {
+            foreach (var m in ConversionMethodMap)
             {
-                if (Regex.IsMatch(message.text,m.Key))
+                if (message.subtype != "bot_message" && Regex.IsMatch(message.text, m.Key))
                 {
                     try
                     {
-                        m.Value.Invoke(message,m.Key);
+                        m.Value.Invoke(message, m.Key);
                     }
                     catch (Exception e) { }
                 }
             }
-            foreach (var r in regexResponses)
+        }
+
+        public void RegexReceiver(NewMessage message) { 
+            foreach (var r in regexResponses )
             {
-                if (Regex.IsMatch(message.text, r.Regex,RegexOptions.IgnoreCase))
+                if (!message.channel.StartsWith('D') && Regex.IsMatch(message.text, r.Regex,RegexOptions.IgnoreCase))
                 {
                     client.PostMessage(null, message.channel, r.Response);
                     if( r.DeleteMessage)
@@ -95,7 +109,7 @@ namespace SlackApp.Controllers
 
         private void TemperatureConversion(NewMessage message, string regex)
         {
-            var matching = Regex.Match(message.text, regex);
+            var matching = Regex.Match(message.text, regex, RegexOptions.IgnoreCase);
             var groups = new List<string>();
             foreach(Group g in matching.Groups)
             {
@@ -109,14 +123,28 @@ namespace SlackApp.Controllers
 
         private void DistanceConversion(NewMessage message,string regex)
         {
-            var matching = Regex.Match(message.text, regex);
+            var matching = Regex.Match(message.text, regex, RegexOptions.IgnoreCase);
             var groups = new List<string>();
             foreach (Group g in matching.Groups)
             {
                 groups.Add(g.Value);
             }
 
-            var replacement = $"That is {Double.Parse(groups[1]) / 0.621371} in miles";
+            var replacement = $"That is {Double.Parse(groups[1]) * 0.621371} in miles";
+
+            client.PostMessage(null, message.channel, replacement);
+        }
+
+        private void MassConversion(NewMessage message, string regex)
+        {
+            var matching = Regex.Match(message.text, regex, RegexOptions.IgnoreCase);
+            var groups = new List<string>();
+            foreach (Group g in matching.Groups)
+            {
+                groups.Add(g.Value);
+            }
+
+            var replacement = $"That is {Double.Parse(groups[1]) / 2.2046} in pounds";
 
             client.PostMessage(null, message.channel, replacement);
         }
