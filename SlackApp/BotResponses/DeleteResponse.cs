@@ -14,6 +14,11 @@ namespace SlackApp.BotResponses
 
         public DeleteResponse(ISlackClient client) : base(client)
         {
+            DeleteRegexs = new List<string>();
+            DeleteRegexs.Add(@"(ur|y..r|'s)\s*(m.m|m..h.r|m.t.rnal)+");
+            DeleteRegexs.Add(@"(m.m|m..h.r|m.t.rnal)'?s (box|face|butt|ass|cunt)");
+            DeleteRegexs.Add(@"(schl...)|(fourth leg)|(fifth leg)");
+
         }
 
         public override void MessageReceiver(NewMessage message)

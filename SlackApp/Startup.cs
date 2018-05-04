@@ -61,6 +61,7 @@ namespace SlackApp
             services.AddAWSService<IAmazonDynamoDB>();
 
             SlackClientProvider = new SlackClientService(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN"), Environment.GetEnvironmentVariable("SLACKSOCKETAUTHTOKEN"));
+            BotResponders = new List<AbstractSocketResponse>();
 
             BotResponders.Add(new BotLimiterResponse(SlackClientProvider));
             BotResponders.Add(new ConversionResponse(SlackClientProvider));
