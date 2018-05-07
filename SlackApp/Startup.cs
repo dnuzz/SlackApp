@@ -16,6 +16,9 @@ using SlackAPIService;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Amazon.DynamoDBv2;
 using SlackApp.BotResponses;
+using Autofac;
+using System.Reflection;
+using Amazon.RDS;
 
 namespace SlackApp
 {
@@ -24,6 +27,9 @@ namespace SlackApp
         public SlackClientService SlackClientProvider { get; private set; }
         public IAmazonService AmazonClient { get; private set; }
         public List<AbstractSocketResponse> BotResponders { get; private set; }
+        public IConfiguration Configuration { get; }
+        public IContainer ServicesContainer { get; private set; }
+        public IHostingEnvironment HostingEnvironment { get; private set; }
 
         public Startup(IHostingEnvironment env)
         {
@@ -32,7 +38,8 @@ namespace SlackApp
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
-            
+
+            HostingEnvironment = env;
 
             if (env.IsDevelopment())
             {
@@ -40,14 +47,12 @@ namespace SlackApp
             }
 
             Configuration = builder.Build();
-        }
 
-        public IConfiguration Configuration { get; }
+        }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            
             if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN")))
             {
                 Environment.SetEnvironmentVariable("SLACKAUTHTOKEN", Configuration["SLACKAUTHTOKEN"]);
@@ -56,17 +61,34 @@ namespace SlackApp
             {
                 Environment.SetEnvironmentVariable("SLACKSOCKETAUTHTOKEN", Configuration["SLACKSOCKETAUTHTOKEN"]);
             }
+
+            var dynamoDBClient = new AmazonDynamoDBClient(Configuration.GetAWSOptions().Credentials, Configuration.GetAWSOptions().Region);
+
             services.AddMvc();
-            services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
-            services.AddAWSService<IAmazonDynamoDB>();
+            services.AddSingleton(dynamoDBClient);
+            //services.AddAWSService<IAmazonDynamoDB>();
 
-            SlackClientProvider = new SlackClientService(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN"), Environment.GetEnvironmentVariable("SLACKSOCKETAUTHTOKEN"));
-            BotResponders = new List<AbstractSocketResponse>();
+            var builder = new ContainerBuilder();
+            var slackservice = new SlackClientService(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN"), Environment.GetEnvironmentVariable("SLACKSOCKETAUTHTOKEN"));
+            var amazonrds = new AmazonRDSClient(Configuration.GetAWSOptions().Credentials, Configuration.GetAWSOptions().Region);
 
-            BotResponders.Add(new BotLimiterResponse(SlackClientProvider));
-            BotResponders.Add(new ConversionResponse(SlackClientProvider));
-            BotResponders.Add(new RegexResponse(SlackClientProvider));
-            BotResponders.Add(new DeleteResponse(SlackClientProvider));
+            if (HostingEnvironment.IsDevelopment())
+            {
+                slackservice.SubscribeToMessage((x) => { Console.WriteLine(x.text); });
+            }
+
+            builder.RegisterInstance(slackservice).As<ISlackClient>();
+            builder.RegisterInstance(dynamoDBClient).As<IAmazonDynamoDB>();
+            builder.RegisterInstance(amazonrds).As<IAmazonRDS>();
+
+            var dataAccess = Assembly.GetExecutingAssembly();
+
+            builder.RegisterAssemblyTypes(dataAccess)
+                   .Where(t =>  (t.Name.EndsWith("Response") && t.BaseType is AbstractSocketResponse))
+                   .AsImplementedInterfaces();
+
+            ServicesContainer = builder.Build();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

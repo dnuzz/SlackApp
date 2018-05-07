@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Amazon.DynamoDBv2;
+using Amazon.RDS;
 using SlackAPI.WebSocketMessages;
 using SlackAPIService;
 
@@ -10,7 +12,8 @@ namespace SlackApp.BotResponses
 {
     public class ConversionResponse : AbstractSocketResponse
     {
-        public ConversionResponse(ISlackClient client) : base(client)
+
+        public ConversionResponse(ISlackClient client, IAmazonRDS rdsDB) : base(client, null, rdsDB)
         {
         }
 
@@ -61,6 +64,16 @@ namespace SlackApp.BotResponses
             var replacement = $"That is {Double.Parse(groups[1]) * 2.2046} in pounds";
 
             Client.RespondToMessage(null, replacement);
+        }
+
+        public override void ReloadResponseTriggers()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SaveResponseTrigger<T>(string key, T value)
+        {
+            throw new NotImplementedException();
         }
     }
 }

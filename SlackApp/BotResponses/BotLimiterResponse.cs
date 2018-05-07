@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.DynamoDBv2;
 using SlackAPI.WebSocketMessages;
 using SlackAPIService;
+using SlackApp.Data;
 
 namespace SlackApp.BotResponses
 {
@@ -11,7 +13,7 @@ namespace SlackApp.BotResponses
     {
         public List<BotCooldownEntry> BotCooldowns = new List<BotCooldownEntry>();
 
-        public BotLimiterResponse(ISlackClient client) : base(client)
+        public BotLimiterResponse(ISlackClient client, IAmazonDynamoDB dynamoDB) : base(client,dynamoDB,null)
         {
         }
 
@@ -35,21 +37,15 @@ namespace SlackApp.BotResponses
                 }
             }
         }
-    }
 
-    public class BotCooldownEntry
-    {
-        public BotCooldownEntry(string botname, string channel, DateTime cooldownEnd, TimeSpan coolDown)
+        public override void ReloadResponseTriggers()
         {
-            Botname = botname;
-            Channel = channel;
-            CooldownEnd = cooldownEnd;
-            CoolDown = coolDown;
+            throw new NotImplementedException();
         }
 
-        public string Botname { get; set; }
-        public string Channel { get; set; }
-        public DateTime CooldownEnd { get; set; }
-        public TimeSpan CoolDown { get; set; }
+        public override void SaveResponseTrigger<T>(string key, T value)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

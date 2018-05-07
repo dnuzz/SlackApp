@@ -20,8 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="4.8.0" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.8" />
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.3.5" />
+    <PackageReference Include="AWSSDK.RDS" Version="3.3.22.2" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.7" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.1" />
     <PackageReference Include="SlackAPI" Version="1.0.5.93" />

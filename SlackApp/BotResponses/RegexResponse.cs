@@ -1,5 +1,8 @@
-﻿using SlackAPI.WebSocketMessages;
+﻿using Amazon.DynamoDBv2;
+using Amazon.RDS;
+using SlackAPI.WebSocketMessages;
 using SlackAPIService;
+using SlackApp.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +15,7 @@ namespace SlackApp.BotResponses
     {
         public List<RegexResponseEntry> RegexResponses { get; set; } = new List<RegexResponseEntry>();
 
-        public RegexResponse(ISlackClient client) : base(client)
+        public RegexResponse(ISlackClient client, IAmazonRDS rdsDB) : base(client, null, rdsDB)
         {
             RegexResponses.Add(new RegexResponseEntry(@"(ur|y..r|'s)\s*(m.m|m..h.r|m.t.rnal)+","No mom jokes allowed",true));
             RegexResponses.Add(new RegexResponseEntry(@"(m.m|m..h.r|m.t.rnal)'?s (box|face|butt|ass|cunt)", "Stop being crude", true));
@@ -32,19 +35,15 @@ namespace SlackApp.BotResponses
                 }
             }
         }
-    }
 
-    public class RegexResponseEntry
-    {
-        public RegexResponseEntry(string regex, string response, bool ephemeral)
+        public override void ReloadResponseTriggers()
         {
-            Regex = regex;
-            Response = response;
-            Ephemeral = ephemeral;
+            throw new NotImplementedException();
         }
 
-        public string Regex { get; set; }
-        public string Response { get; set; }
-        public bool Ephemeral { get; set; }
+        public override void SaveResponseTrigger<RegexResponseEntry>(string key, RegexResponseEntry value)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using SlackAPI.WebSocketMessages;
+﻿using Amazon.DynamoDBv2;
+using SlackAPI.WebSocketMessages;
 using SlackAPIService;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace SlackApp.BotResponses
     {
         public List<string> DeleteRegexs { get; set; }
 
-        public DeleteResponse(ISlackClient client) : base(client)
+        public DeleteResponse(ISlackClient client, IAmazonDynamoDB dynamoDB) : base(client, dynamoDB, null)
         {
             DeleteRegexs = new List<string>();
             DeleteRegexs.Add(@"(ur|y..r|'s)\s*(m.m|m..h.r|m.t.rnal)+");
@@ -30,6 +31,16 @@ namespace SlackApp.BotResponses
                     Client.DeleteMessage(message);
                 }
             }
+        }
+
+        public override void ReloadResponseTriggers()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SaveResponseTrigger<T>(string key, T value)
+        {
+            throw new NotImplementedException();
         }
     }
 }
