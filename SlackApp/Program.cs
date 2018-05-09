@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SlackAPI;
 using SlackApp.Controllers;
+using Autofac.Extensions.DependencyInjection;
 
 namespace SlackApp
 {
@@ -19,8 +20,9 @@ namespace SlackApp
         public static void Main(string[] args)
         {
             var host = WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
                 .UseKestrel()
+                .ConfigureServices(services => services.AddAutofac())
+                .UseStartup<Startup>()
                 .Build();
 
             host.Run();

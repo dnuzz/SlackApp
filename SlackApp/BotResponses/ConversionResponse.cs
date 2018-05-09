@@ -26,42 +26,30 @@ namespace SlackApp.BotResponses
 
         private void TemperatureConversion(NewMessage message, string regex)
         {
-            var matching = Regex.Match(message.text, regex, RegexOptions.IgnoreCase);
-            var groups = new List<string>();
-            foreach (Group g in matching.Groups)
-            {
-                groups.Add(g.Value);
-            }
+            var number = RegexFilter(message, regex);
+            if (String.IsNullOrEmpty(number)) { return; }
 
-            var replacement = $"That is {Double.Parse(groups[1]) * 9.0 / 5.0 + 32} in farenheit";
+            var replacement = $"That is {Double.Parse(number) * 9.0 / 5.0 + 32} in farenheit";
 
             Client.RespondToMessage(null, replacement);
         }
 
         private void DistanceConversion(NewMessage message, string regex)
         {
-            var matching = Regex.Match(message.text, regex, RegexOptions.IgnoreCase);
-            var groups = new List<string>();
-            foreach (Group g in matching.Groups)
-            {
-                groups.Add(g.Value);
-            }
+            var number = RegexFilter(message, regex);
+            if (String.IsNullOrEmpty(number)) { return; }
 
-            var replacement = $"That is {Double.Parse(groups[1]) * 0.621371} in miles";
+            var replacement = $"That is {Double.Parse(number) * 0.621371} in miles";
 
             Client.RespondToMessage(null, replacement);
         }
 
         private void MassConversion(NewMessage message, string regex)
         {
-            var matching = Regex.Match(message.text, regex, RegexOptions.IgnoreCase);
-            var groups = new List<string>();
-            foreach (Group g in matching.Groups)
-            {
-                groups.Add(g.Value);
-            }
+            var number = RegexFilter(message, regex);
+            if (String.IsNullOrEmpty(number)) { return; }
 
-            var replacement = $"That is {Double.Parse(groups[1]) * 2.2046} in pounds";
+            var replacement = $"That is {Double.Parse(number) * 2.2046} in pounds";
 
             Client.RespondToMessage(null, replacement);
         }
@@ -74,6 +62,28 @@ namespace SlackApp.BotResponses
         public override void SaveResponseTrigger<T>(string key, T value)
         {
             throw new NotImplementedException();
+        }
+
+        private string RegexFilter(NewMessage message, string regex)
+        {
+            try
+            {
+                if (Regex.IsMatch(message.text, regex, RegexOptions.IgnoreCase))
+                {
+                    return null;
+                }
+                var matching = Regex.Match(message.text, regex, RegexOptions.IgnoreCase);
+                var groups = new List<string>();
+                foreach (Group g in matching.Groups)
+                {
+                    groups.Add(g.Value);
+                }
+                return groups[1];
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
         }
     }
 }

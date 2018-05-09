@@ -19,23 +19,30 @@ namespace SlackApp.BotResponses
 
         public override void MessageReceiver(NewMessage message)
         {
-            if (message.subtype == "bot_message" && !message.channel.StartsWith('D'))
+            try
             {
-                var bot_channel = BotCooldowns
-                    .Where((x) => { return x.Botname == message.user && x.Channel == message.channel; })
-                    .DefaultIfEmpty(new BotCooldownEntry(String.Empty, string.Empty, DateTime.MinValue,TimeSpan.MinValue))
-                    .FirstOrDefault();
+                if (message.subtype == "bot_message" && !message.channel.StartsWith('D'))
+                {
+                    var bot_channel = BotCooldowns
+                        .Where((x) => { return x.Botname == message.user && x.Channel == message.channel; })
+                        .DefaultIfEmpty(new BotCooldownEntry(String.Empty, string.Empty, DateTime.MinValue, TimeSpan.MinValue))
+                        .FirstOrDefault();
 
-                if (bot_channel.Botname == message.user && bot_channel.Channel == message.channel && bot_channel.CooldownEnd > DateTime.UtcNow)
-                {
-                    Client.DeleteMessage(message);
+                    if (bot_channel.Botname == message.user && bot_channel.Channel == message.channel && bot_channel.CooldownEnd > DateTime.UtcNow)
+                    {
+                        Client.DeleteMessage(message);
+                    }
+                    else
+                    {
+                        BotCooldowns.Remove(bot_channel);
+                        BotCooldowns.Add(new BotCooldownEntry(message.user, message.channel, DateTime.UtcNow + bot_channel.CoolDown, bot_channel.CoolDown));
+                    }
                 }
-                else
-                {
-                    BotCooldowns.Remove(bot_channel);
-                    BotCooldowns.Add(new BotCooldownEntry(message.user, message.channel, DateTime.UtcNow + bot_channel.CoolDown, bot_channel.CoolDown));
-                }
+            } catch (Exception e)
+            {
+                
             }
+
         }
 
         public override void ReloadResponseTriggers()

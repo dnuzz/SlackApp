@@ -8,6 +8,8 @@ namespace SlackApp.Data
 {
     public class BotCooldownEntry : AttributeValue
     {
+        public static TimeSpan DefaultCooldown = new TimeSpan(0, 2, 0);
+
         public BotCooldownEntry(string botname, string channel, DateTime cooldownEnd, TimeSpan coolDown)
         {
             Botname = botname;

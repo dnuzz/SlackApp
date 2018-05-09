@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SlackApp.BotResponses
 {
-    public abstract class AbstractSocketResponse
+    public abstract class AbstractSocketResponse : IMessageReceiver
     {
         protected ISlackClient Client { get; private set; }
         protected IAmazonDynamoDB DynamoDB { get; private set; }
