@@ -31,7 +31,7 @@ namespace SlackApp.BotResponses
 
             var replacement = $"That is {Double.Parse(number) * 9.0 / 5.0 + 32} in farenheit";
 
-            Client.RespondToMessage(null, replacement);
+            Client.RespondToMessage(message, replacement);
         }
 
         private void DistanceConversion(NewMessage message, string regex)
@@ -41,7 +41,7 @@ namespace SlackApp.BotResponses
 
             var replacement = $"That is {Double.Parse(number) * 0.621371} in miles";
 
-            Client.RespondToMessage(null, replacement);
+            Client.RespondToMessage(message, replacement);
         }
 
         private void MassConversion(NewMessage message, string regex)
@@ -51,7 +51,7 @@ namespace SlackApp.BotResponses
 
             var replacement = $"That is {Double.Parse(number) * 2.2046} in pounds";
 
-            Client.RespondToMessage(null, replacement);
+            Client.RespondToMessage(message, replacement);
         }
 
         public override void ReloadResponseTriggers()
@@ -68,7 +68,7 @@ namespace SlackApp.BotResponses
         {
             try
             {
-                if (Regex.IsMatch(message.text, regex, RegexOptions.IgnoreCase))
+                if (!Regex.IsMatch(message.text, regex, RegexOptions.IgnoreCase))
                 {
                     return null;
                 }
