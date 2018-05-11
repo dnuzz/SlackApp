@@ -59,13 +59,18 @@ namespace SlackAPIService
         {
             if (ephemeral)
             {
+                try
+                {
+                    _socketclient.PostEphemeralMessage(null, original.channel, text, original.user, parse, linkNames, attachments, as_user, thread_ts);
+                    return;
+                }
+                catch (Exception e) { }
+
                 List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
 
                 parameters.Add(new Tuple<string, string>("channel", original.channel));
                 parameters.Add(new Tuple<string, string>("text", text));
-
-                if (!string.IsNullOrEmpty(botName))
-                    parameters.Add(new Tuple<string, string>("user", original.user));
+                parameters.Add(new Tuple<string, string>("user", original.user));
 
                 if (!string.IsNullOrEmpty(parse))
                     parameters.Add(new Tuple<string, string>("parse", parse));
