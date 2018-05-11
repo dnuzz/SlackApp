@@ -27,7 +27,6 @@
     <PackageReference Include="AWSSDK.RDS" Version="3.3.22.2" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.7" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.1" />
-    <PackageReference Include="SlackAPI" Version="1.0.5.93" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,6 +35,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SlackAPIService\SlackAPIService.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="SlackAPI">
+      <HintPath>..\..\SlackAPI\SlackAPI\bin\Release\netcoreapp2.0\SlackAPI.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

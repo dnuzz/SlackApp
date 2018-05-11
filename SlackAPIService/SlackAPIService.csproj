@@ -5,8 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SlackAPI" Version="1.0.5.93" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="SlackAPI">
+      <HintPath>..\..\SlackAPI\SlackAPI\bin\Release\netcoreapp2.0\SlackAPI.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

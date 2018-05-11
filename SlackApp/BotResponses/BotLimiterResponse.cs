@@ -24,18 +24,18 @@ namespace SlackApp.BotResponses
                 if (message.subtype == "bot_message" && !message.channel.StartsWith('D'))
                 {
                     var bot_channel = BotCooldowns
-                        .Where((x) => { return x.Botname == message.user && x.Channel == message.channel; })
-                        .DefaultIfEmpty(new BotCooldownEntry(String.Empty, string.Empty, DateTime.MinValue, TimeSpan.MinValue))
+                        .Where((x) => { return x.Botname == message.bot_id && x.Channel == message.channel; })
+                        .DefaultIfEmpty(new BotCooldownEntry(String.Empty, string.Empty, DateTime.MinValue, new TimeSpan(1000)))
                         .FirstOrDefault();
 
-                    if (bot_channel.Botname == message.user && bot_channel.Channel == message.channel && bot_channel.CooldownEnd > DateTime.UtcNow)
+                    if (bot_channel.Botname == message.bot_id && bot_channel.Channel == message.channel && bot_channel.CooldownEnd > DateTime.UtcNow)
                     {
                         Client.DeleteMessage(message);
                     }
                     else
                     {
                         BotCooldowns.Remove(bot_channel);
-                        BotCooldowns.Add(new BotCooldownEntry(message.user, message.channel, DateTime.UtcNow + bot_channel.CoolDown, bot_channel.CoolDown));
+                        BotCooldowns.Add(new BotCooldownEntry(message.bot_id, message.channel, DateTime.UtcNow + bot_channel.CoolDown, bot_channel.CoolDown));
                     }
                 }
             } catch (Exception e)
