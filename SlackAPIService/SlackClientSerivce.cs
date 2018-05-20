@@ -65,33 +65,6 @@ namespace SlackAPIService
                     return;
                 }
                 catch (Exception e) { }
-
-                List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
-
-                parameters.Add(new Tuple<string, string>("channel", original.channel));
-                parameters.Add(new Tuple<string, string>("text", text));
-                parameters.Add(new Tuple<string, string>("user", original.user));
-
-                if (!string.IsNullOrEmpty(parse))
-                    parameters.Add(new Tuple<string, string>("parse", parse));
-
-                if (linkNames)
-                    parameters.Add(new Tuple<string, string>("link_names", "1"));
-
-                if (attachments != null && attachments.Length > 0)
-                    parameters.Add(new Tuple<string, string>("attachments",
-                        JsonConvert.SerializeObject(attachments, Formatting.None,
-                                new JsonSerializerSettings // Shouldn't include a not set property
-                            {
-                                    NullValueHandling = NullValueHandling.Ignore
-                                })));
-
-                if (unfurl_links)
-                    parameters.Add(new Tuple<string, string>("unfurl_links", "1"));
-
-                parameters.Add(new Tuple<string, string>("as_user", as_user.ToString()));
-
-                _client.APIRequestWithToken<PostEphemeralResponse>(null,parameters.ToArray());
             }
             else
             {

@@ -13,7 +13,7 @@ namespace SlackApp.BotResponses
     public class ConversionResponse : AbstractSocketResponse
     {
 
-        public ConversionResponse(ISlackClient client, IAmazonRDS rdsDB) : base(client, null, rdsDB)
+        public ConversionResponse(ISlackClient client) : base(client)
         {
         }
 
@@ -59,7 +59,7 @@ namespace SlackApp.BotResponses
             throw new NotImplementedException();
         }
 
-        public override void SaveResponseTrigger<T>(string key, T value)
+        public override void SaveResponseTrigger<T>( T value)
         {
             throw new NotImplementedException();
         }

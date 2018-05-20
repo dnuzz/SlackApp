@@ -20,6 +20,8 @@ using Autofac;
 using System.Reflection;
 using Amazon.RDS;
 using Autofac.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+using SlackApp.Data;
 
 namespace SlackApp
 {
@@ -52,7 +54,7 @@ namespace SlackApp
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN")))
             {
@@ -62,31 +64,26 @@ namespace SlackApp
             {
                 Environment.SetEnvironmentVariable("SLACKSOCKETAUTHTOKEN", Configuration["SLACKSOCKETAUTHTOKEN"]);
             }
+            if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("slackapidbconnection")))
+            {
+                Environment.SetEnvironmentVariable("slackapidbconnection", Configuration["slackapidbconnection"]);
+            }
 
+            services.AddDbContext<AppResponseContext>(options =>
+                options.UseSqlServer(Environment.GetEnvironmentVariable("slackapidbconnection")));
             services.AddMvc();
             services.AddAutofac();
-        }
 
-        public void ConfigureContainer(ContainerBuilder builder)
-        {
-            var dynamoDBClient = new AmazonDynamoDBClient(Configuration.GetAWSOptions().Credentials, Configuration.GetAWSOptions().Region);
             var slackservice = new SlackClientService(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN"), Environment.GetEnvironmentVariable("SLACKSOCKETAUTHTOKEN"));
-            var amazonrds = new AmazonRDSClient(Configuration.GetAWSOptions().Credentials, Configuration.GetAWSOptions().Region);
+            var builder = new ContainerBuilder();
 
             builder.RegisterInstance(slackservice).As<ISlackClient>();
-            builder.RegisterInstance(dynamoDBClient).As<IAmazonDynamoDB>();
-            builder.RegisterInstance(amazonrds).As<IAmazonRDS>();
-
-            if (HostingEnvironment.IsDevelopment()) { slackservice.SubscribeToMessage((x) => { Console.WriteLine(x.text); }); }
-
-            var dataAccess = Assembly.GetExecutingAssembly();
-
-            //builder.RegisterType<BotLimiterResponse>();
-            builder.RegisterAssemblyTypes(dataAccess)
-                   .Where(t => (t.BaseType == typeof(AbstractSocketResponse)))
-                   .As<IMessageReceiver>();
-
+            builder.Populate(services);
             builder.RegisterBuildCallback(x => { this.ContainerBuildCallback(x); });
+
+            var container = builder.Build();
+            //Create the IServiceProvider based on the container.
+            return new AutofacServiceProvider(container);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -103,6 +100,7 @@ namespace SlackApp
         private void ContainerBuildCallback(IContainer container)
         {
             container.BeginLifetimeScope().Resolve<IEnumerable<IMessageReceiver>>();
+            DbInitializer.Initialize(container.BeginLifetimeScope().Resolve<AppResponseContext>());
         }
     }
 }

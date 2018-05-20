@@ -1,6 +1,7 @@
 ﻿using Amazon.DynamoDBv2;
 using SlackAPI.WebSocketMessages;
 using SlackAPIService;
+using SlackApp.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,14 +12,14 @@ namespace SlackApp.BotResponses
 {
     public class DeleteResponse : AbstractSocketResponse
     {
-        public List<string> DeleteRegexs { get; set; }
+        public List<DeleteResponseEntry> DeleteRegexs { get; set; }
 
-        public DeleteResponse(ISlackClient client, IAmazonDynamoDB dynamoDB) : base(client, dynamoDB, null)
+        public DeleteResponse(ISlackClient client) : base(client)
         {
-            DeleteRegexs = new List<string>();
-            DeleteRegexs.Add(@"(ur|y..r|'s)\s*(m.m|m..h.r|m.t.rnal)+");
-            DeleteRegexs.Add(@"(m.m|m..h.r|m.t.rnal)'?s (box|face|butt|ass|cunt)");
-            DeleteRegexs.Add(@"(schl...)|(fourth leg)|(fifth leg)");
+            DeleteRegexs = new List<DeleteResponseEntry>();
+            DeleteRegexs.Add(new DeleteResponseEntry(@"(ur|y..r|'s)\s*(m.m|m..h.r|m.t.rnal)+"));
+            DeleteRegexs.Add(new DeleteResponseEntry(@"(m.m|m..h.r|m.t.rnal)'?s (box|face|butt|ass|cunt)"));
+            DeleteRegexs.Add(new DeleteResponseEntry(@"(schl...)|(fourth leg)|(fifth leg)"));
 
         }
 
@@ -26,7 +27,7 @@ namespace SlackApp.BotResponses
         {
             foreach(var regex in DeleteRegexs)
             {
-                if (!message.channel.StartsWith('D') && Regex.IsMatch(message.text, regex, RegexOptions.IgnoreCase))
+                if (!message.channel.StartsWith('D') && Regex.IsMatch(message.text, regex.Regex, RegexOptions.IgnoreCase))
                 {
                     Client.DeleteMessage(message);
                 }
@@ -38,7 +39,7 @@ namespace SlackApp.BotResponses
             throw new NotImplementedException();
         }
 
-        public override void SaveResponseTrigger<T>(string key, T value)
+        public override void SaveResponseTrigger<T>( T value)
         {
             throw new NotImplementedException();
         }

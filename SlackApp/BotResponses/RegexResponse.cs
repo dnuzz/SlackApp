@@ -3,6 +3,7 @@ using Amazon.RDS;
 using SlackAPI.WebSocketMessages;
 using SlackAPIService;
 using SlackApp.Data;
+using SlackApp.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace SlackApp.BotResponses
     {
         public List<RegexResponseEntry> RegexResponses { get; set; } = new List<RegexResponseEntry>();
 
-        public RegexResponse(ISlackClient client, IAmazonRDS rdsDB) : base(client, null, rdsDB)
+        public RegexResponse(ISlackClient client) : base(client)
         {
             RegexResponses.Add(new RegexResponseEntry(@"(ur|y..r|'s)\s*(m.m|m..h.r|m.t.rnal)","No mom jokes allowed",true));
             RegexResponses.Add(new RegexResponseEntry(@"(m.m|m..h.r|m.t.rnal)'?s (box|face|butt|ass|cunt)", "Stop being crude", true));
@@ -38,7 +39,7 @@ namespace SlackApp.BotResponses
             throw new NotImplementedException();
         }
 
-        public override void SaveResponseTrigger<RegexResponseEntry>(string key, RegexResponseEntry value)
+        public override void SaveResponseTrigger<RegexResponseEntry>( RegexResponseEntry value)
         {
             throw new NotImplementedException();
         }
