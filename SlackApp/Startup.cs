@@ -56,7 +56,8 @@ namespace SlackApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            var env_variables = new List<string>() { "SLACKAUTHTOKEN", "SLACKSOCKETAUTHTOKEN", "slackapidbconnectionprod" };
+            //This will load env variables from your configuration if you are storing them there for development.
+            var env_variables = new List<string>() { "BOT_AUTH_TOKEN", "DB_CONNECTION_STRING" };
             foreach(var env in env_variables)
             {
                 if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable(env)))
@@ -65,17 +66,26 @@ namespace SlackApp
                 }
             }
 
+            var db_conn_string = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+            var auth_token = Environment.GetEnvironmentVariable("BOT_AUTH_TOKEN");
+
+            // ASP.NET CORE Services configuration
             services.AddDbContext<AppResponseContext>(options =>
-                options.UseSqlServer(Environment.GetEnvironmentVariable("slackapidbconnectionprod")));
+                options.UseSqlServer(db_conn_string));
             services.AddMvc();
             services.AddAutofac();
 
-            var slackservice = new SlackClientService(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN"), Environment.GetEnvironmentVariable("SLACKSOCKETAUTHTOKEN"));
+            //Autofac configuration
             var builder = new ContainerBuilder();
+            var slackservice = new SlackClientService(auth_token, auth_token);
 
             builder.RegisterInstance(slackservice).As<ISlackClient>();
-            builder.Populate(services);
+            builder.RegisterAssemblyTypes(Assembly.GetAssembly(typeof(AbstractSocketResponse)))
+               .Where(t => t.BaseType == typeof(AbstractSocketResponse))
+               .AsImplementedInterfaces()
+               .InstancePerLifetimeScope();
             builder.RegisterBuildCallback(x => { this.ContainerBuildCallback(x); });
+            builder.Populate(services);
 
             var container = builder.Build();
             //Create the IServiceProvider based on the container.
@@ -95,7 +105,7 @@ namespace SlackApp
 
         private void ContainerBuildCallback(IContainer container)
         {
-            container.BeginLifetimeScope().Resolve<IEnumerable<IMessageReceiver>>();
+            container.BeginLifetimeScope().Resolve<IEnumerable<IMessageReceiver>>().ToList();
             DbInitializer.Initialize(container.BeginLifetimeScope().Resolve<AppResponseContext>());
         }
     }
