@@ -39,7 +39,7 @@
 
   <ItemGroup>
     <Reference Include="SlackAPI">
-      <HintPath>..\..\SlackAPI\SlackAPI\bin\Release\netcoreapp2.0\SlackAPI.dll</HintPath>
+      <HintPath>..\Assemblies\SlackAPI.dll</HintPath>
     </Reference>
   </ItemGroup>
 

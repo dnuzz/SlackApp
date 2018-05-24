@@ -56,21 +56,17 @@ namespace SlackApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("SLACKAUTHTOKEN")))
+            var env_variables = new List<string>() { "SLACKAUTHTOKEN", "SLACKSOCKETAUTHTOKEN", "slackapidbconnectionprod" };
+            foreach(var env in env_variables)
             {
-                Environment.SetEnvironmentVariable("SLACKAUTHTOKEN", Configuration["SLACKAUTHTOKEN"]);
-            }
-            if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("SLACKSOCKETAUTHTOKEN")))
-            {
-                Environment.SetEnvironmentVariable("SLACKSOCKETAUTHTOKEN", Configuration["SLACKSOCKETAUTHTOKEN"]);
-            }
-            if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("slackapidbconnection")))
-            {
-                Environment.SetEnvironmentVariable("slackapidbconnection", Configuration["slackapidbconnection"]);
+                if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable(env)))
+                {
+                    Environment.SetEnvironmentVariable(env, Configuration[env]);
+                }
             }
 
             services.AddDbContext<AppResponseContext>(options =>
-                options.UseSqlServer(Environment.GetEnvironmentVariable("slackapidbconnection")));
+                options.UseSqlServer(Environment.GetEnvironmentVariable("slackapidbconnectionprod")));
             services.AddMvc();
             services.AddAutofac();
 
